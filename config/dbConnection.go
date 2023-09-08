@@ -11,10 +11,13 @@ import (
 	"gorm.io/gorm"
 )
 
-var DB *gorm.DB
+// var DB *gorm.DB
 
-func Connect(){
-	godotenv.Load()
+func Connect() (*gorm.DB, error){
+	
+	if err := godotenv.Load(); err != nil {
+		panic("Failed to load .env file")
+	}
 
 	dbhost := os.Getenv("MYSQL_HOST")
 	dbportStr := os.Getenv("MYSQL_PORT")
@@ -34,11 +37,12 @@ func Connect(){
 		panic("db connection failed")
 	}
 
-	DB = db
+	// DB = db
 
 	fmt.Println(" db connected successfully")
 
 	AutoMigrate(db)
+	return db, nil
 }
 
 func AutoMigrate(connection *gorm.DB){

@@ -1,16 +1,61 @@
 package controllers
 
 import (
+	"github.com/babakkamali/note-api/services"
+	"github.com/babakkamali/note-api/utils"
 	"github.com/gofiber/fiber/v2"
 )
 
-func LoginUser(c *fiber.Ctx) error {
-	// logic for user login here
-	
-	phoneNumber := c.FormValue("phone_number")
+type UserController struct {
+	userService *services.UserService
+}
 
-	return c.JSON(fiber.Map{
-		"message": "User logged in successfully",
-		"user":    phoneNumber,
-	})
+func NewUserController(service *services.UserService) *UserController {
+	return &UserController{
+		userService: service,
+	}
+}
+
+func (uc *UserController) AuthenticateOrRegister(c *fiber.Ctx) error {
+    var input struct {
+        PhoneNumber string `json:"phone_number"`
+    }
+
+    if err := c.BodyParser(&input); err != nil {
+        return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Invalid input")
+    }
+
+	// Validate the phone number with regex
+	validPhoneNumber := utils.ValidatePhoneNumber(input.PhoneNumber)
+	if !validPhoneNumber {
+		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Invalid phone number format")
+	}
+
+	smsToken, err := uc.userService.GenerateAndSendSMSToken(input.PhoneNumber)
+    if err != nil {
+        return utils.SendErrorResponse(c, fiber.StatusInternalServerError, err.Error())
+    }
+
+    // Note: Usually, you wouldn't send the smsToken in the response for security reasons.
+    // Just included for debugging purposes.
+    return c.JSON(fiber.Map{"status": "success", "message": "SMS token sent", "smsToken": smsToken})
+
+}
+
+func (uc *UserController) ValidateSMSTokenAndLogin(c *fiber.Ctx) error {
+    var input struct {
+        PhoneNumber string `json:"phone_number"`
+        SMSToken    string `json:"sms_token"`
+    }
+
+    if err := c.BodyParser(&input); err != nil {
+        return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Invalid input")
+    }
+
+    jwtToken, err := uc.userService.ValidateTokenAndLogin(input.PhoneNumber, input.SMSToken)
+    if err != nil {
+        return utils.SendErrorResponse(c, fiber.StatusInternalServerError, err.Error())
+    }
+
+    return c.JSON(fiber.Map{"token": jwtToken})
 }

@@ -20,12 +20,8 @@ func (s *NoteService) CreateNote(note *models.Note) error {
 	return nil
 }
 
-func (s *NoteService) GetNoteByID(noteID uint) (*models.Note, error) {
-	note, err := s.repo.GetNoteByID(noteID)
-	if err != nil {
-		return nil, err
-	}
-	return note, nil
+func (s *NoteService) GetNoteByID(note models.Note) (*models.Note, error) {
+	return s.repo.GetNoteByID(note)
 }
 
 func (s *NoteService) GetAllNotes(userID uint) ([]models.Note, error) {
@@ -37,15 +33,9 @@ func (s *NoteService) GetAllNotes(userID uint) ([]models.Note, error) {
 }
 
 func (s *NoteService) UpdateNote(note *models.Note) error {
-	if err := s.repo.UpdateNote(note); err != nil {
-		return err
-	}
-	return nil
+	return s.repo.UpdateNote(note)
 }
 
-func (s *NoteService) DeleteNote(noteID uint) error {
-	if err := s.repo.DeleteNote(noteID); err != nil {
-		return err
-	}
-	return nil
+func (s *NoteService) DeleteNote(note *models.Note) error {
+	return s.repo.DeleteNote(note)
 }

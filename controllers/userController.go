@@ -31,14 +31,12 @@ func (uc *UserController) AuthenticateOrRegister(c *fiber.Ctx) error {
 		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Invalid phone number format")
 	}
 
-	smsToken, err := uc.userService.GenerateAndSendSMSToken(input.PhoneNumber)
+	_, err := uc.userService.GenerateAndSendSMSToken(input.PhoneNumber)
     if err != nil {
         return utils.SendErrorResponse(c, fiber.StatusInternalServerError, err.Error())
     }
 
-    // Note: Usually, you wouldn't send the smsToken in the response for security reasons.
-    // Just included for debugging purposes.
-    return c.JSON(fiber.Map{"status": "success", "message": "SMS token sent", "smsToken": smsToken})
+    return c.JSON(fiber.Map{"status": "success", "message": "SMS token sent"})
 
 }
 

@@ -17,14 +17,14 @@ func (repo *NoteRepository) CreateNote(note *models.Note) error {
     return repo.db.Create(note).Error
 }
 
-func (repo *NoteRepository) GetNoteByID(noteID uint) (*models.Note, error) {
-    var note models.Note
-    err := repo.db.First(&note, noteID).Error
+func (repo *NoteRepository) GetNoteByID(note models.Note) (*models.Note, error) {
+    err := repo.db.Where("id = ? AND user_id = ?", note.Id, note.UserId).First(&note).Error
     if err != nil {
         return nil, err
     }
     return &note, nil
 }
+
 
 func (repo *NoteRepository) GetAllNotes(userID uint) ([]models.Note, error) {
     var notes []models.Note
@@ -36,9 +36,9 @@ func (repo *NoteRepository) GetAllNotes(userID uint) ([]models.Note, error) {
 }
 
 func (repo *NoteRepository) UpdateNote(note *models.Note) error {
-    return repo.db.Save(note).Error
+    return repo.db.Model(&models.Note{}).Where("id = ? AND user_id = ?", note.Id, note.UserId).Updates(note).Error
 }
 
-func (repo *NoteRepository) DeleteNote(noteID uint) error {
-    return repo.db.Delete(&models.Note{}, noteID).Error
+func (repo *NoteRepository) DeleteNote(note *models.Note) error {
+    return repo.db.Where("id = ? AND user_id = ?", note.Id, note.UserId).Delete(&models.Note{}).Error
 }

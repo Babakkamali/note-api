@@ -21,25 +21,51 @@ func NewNoteController(service *services.NoteService) *NoteController {
 
 // CreateNote handles POST requests to create a new note.
 func (nc *NoteController) CreateNote(c *fiber.Ctx) error {
-	// Logic for creating a new note...
+    // Parse the note from the request body
+    var newNote models.Note
+    if err := c.BodyParser(&newNote); err != nil {
+        return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Failed to parse request body")
+    }
 
-	return c.JSON(fiber.Map{"status": "success", "message": "Note created"})
+    // Fetch the user ID from the context (provided by the Authentication middleware)
+    userID, ok := c.Locals("userID").(uint)
+    if !ok {
+        return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Invalid or missing user ID")
+    }
+
+    newNote.UserId = userID
+
+    // Use the service to create a new note
+    if err := nc.noteService.CreateNote(&newNote); err != nil {
+        return utils.SendErrorResponse(c, fiber.StatusInternalServerError, "Failed to create note")
+    }
+
+    return c.JSON(fiber.Map{"status": "success", "message": "Note created", "data": newNote})
 }
 
 // GetNoteByID handles GET requests to retrieve a note by its ID.
 func (nc *NoteController) GetNoteByID(c *fiber.Ctx) error {
-	noteIDStr := c.Params("id")
-	noteID, err := strconv.Atoi(noteIDStr)
-	if err != nil {
-		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Invalid note ID")
-	}
+    var note models.Note
+    noteIDStr := c.Params("id")
+    noteID, err := strconv.Atoi(noteIDStr)
+    if err != nil {
+        return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Invalid note ID")
+    }
 
-	note, err := nc.noteService.GetNoteByID(uint(noteID))
-	if err != nil {
-		return utils.SendErrorResponse(c, fiber.StatusNotFound, "Note not found")
-	}
+    userID, ok := c.Locals("userID").(uint)
+    if !ok {
+        return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Invalid or missing user ID")
+    }
 
-	return c.JSON(note)
+    note.Id = uint(noteID)
+    note.UserId = userID
+
+    retrievedNote, err := nc.noteService.GetNoteByID(note)
+    if err != nil {
+        return utils.SendErrorResponse(c, fiber.StatusNotFound, "Note not found")
+    }
+
+    return c.JSON(retrievedNote)
 }
 
 // GetAllNotes handles GET requests to retrieve all notes of a user.
@@ -59,39 +85,55 @@ func (nc *NoteController) GetAllNotes(c *fiber.Ctx) error {
 
 // UpdateNote handles PUT requests to update a note by ID.
 func (nc *NoteController) UpdateNote(c *fiber.Ctx) error {
-	noteIDStr := c.Params("id")
-	noteID, err := strconv.Atoi(noteIDStr)
-	if err != nil {
-		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Invalid note ID")
-	}
+    noteIDStr := c.Params("id")
+    noteID, err := strconv.Atoi(noteIDStr)
+    if err != nil {
+        return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Invalid note ID")
+    }
 
-	// Parsing the body to get the updated fields
-	var updatedNote models.Note
-	if err := c.BodyParser(&updatedNote); err != nil {
-		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Failed to parse request body")
-	}
+    userID, ok := c.Locals("userID").(uint)
+    if !ok {
+        return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Invalid or missing user ID")
+    }
 
-	updatedNote.Id = uint(noteID)
-	err = nc.noteService.UpdateNote(&updatedNote)
-	if err != nil {
-		return utils.SendErrorResponse(c, fiber.StatusInternalServerError, "Failed to update note")
-	}
+    // Parsing the body to get the updated fields
+    var updatedNote models.Note
+    if err := c.BodyParser(&updatedNote); err != nil {
+        return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Failed to parse request body")
+    }
 
-	return c.JSON(fiber.Map{"status": "success", "message": "Note updated successfully"})
+    updatedNote.Id = uint(noteID)
+    updatedNote.UserId = userID // Setting the UserId from the authenticated session, not the request body
+    err = nc.noteService.UpdateNote(&updatedNote)
+    if err != nil {
+        return utils.SendErrorResponse(c, fiber.StatusInternalServerError, "Failed to update note")
+    }
+
+    return c.JSON(fiber.Map{"status": "success", "message": "Note updated successfully"})
 }
+
 
 // DeleteNote handles DELETE requests to delete a note by ID.
 func (nc *NoteController) DeleteNote(c *fiber.Ctx) error {
-	noteIDStr := c.Params("id")
-	noteID, err := strconv.Atoi(noteIDStr)
-	if err != nil {
-		return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Invalid note ID")
-	}
+    noteIDStr := c.Params("id")
+    noteID, err := strconv.Atoi(noteIDStr)
+    if err != nil {
+        return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Invalid note ID")
+    }
 
-	err = nc.noteService.DeleteNote(uint(noteID))
-	if err != nil {
-		return utils.SendErrorResponse(c, fiber.StatusInternalServerError, "Failed to delete note")
-	}
+    userID, ok := c.Locals("userID").(uint)
+    if !ok {
+        return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Invalid or missing user ID")
+    }
 
-	return c.JSON(fiber.Map{"status": "success", "message": "Note deleted successfully"})
+    noteToDelete := models.Note{
+        Id: uint(noteID),
+        UserId: userID, // Setting the UserId from the authenticated session
+    }
+    err = nc.noteService.DeleteNote(&noteToDelete)
+    if err != nil {
+        return utils.SendErrorResponse(c, fiber.StatusInternalServerError, "Failed to delete note")
+    }
+
+    return c.JSON(fiber.Map{"status": "success", "message": "Note deleted successfully"})
 }

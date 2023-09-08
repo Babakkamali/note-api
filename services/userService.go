@@ -92,7 +92,7 @@ func (s *UserService) ValidateSMSToken(phoneNumber, token string) error {
     }
 
     if storedToken.Token != token {
-        return errors.New("Invalid token original: "+storedToken.Token+ " sent token:"+token)
+        return errors.New("Invalid token")
     }
 
     if storedToken.ExpiryDate.Before(time.Now()) {

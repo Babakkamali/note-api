@@ -44,13 +44,17 @@ func (nc *NoteController) GetNoteByID(c *fiber.Ctx) error {
 
 // GetAllNotes handles GET requests to retrieve all notes of a user.
 func (nc *NoteController) GetAllNotes(c *fiber.Ctx) error {
-	userID := c.Locals("userID").(uint) // Assuming you've stored the user ID in the context using some middleware
-	notes, err := nc.noteService.GetAllNotes(userID)
-	if err != nil {
-		return utils.SendErrorResponse(c, fiber.StatusInternalServerError, "Failed to retrieve notes")
-	}
+    userID, ok := c.Locals("userID").(uint) // Two-variable type assertion
+    if !ok {
+        return utils.SendErrorResponse(c, fiber.StatusBadRequest, "Invalid or missing user ID")
+    }
 
-	return c.JSON(fiber.Map{"status": "success", "data": notes})
+    notes, err := nc.noteService.GetAllNotes(userID)
+    if err != nil {
+        return utils.SendErrorResponse(c, fiber.StatusInternalServerError, "Failed to retrieve notes")
+    }
+
+    return c.JSON(fiber.Map{"status": "success", "data": notes})
 }
 
 // UpdateNote handles PUT requests to update a note by ID.

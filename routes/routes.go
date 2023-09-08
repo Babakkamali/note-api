@@ -2,6 +2,7 @@ package routes
 
 import (
 	"github.com/babakkamali/note-api/controllers"
+	"github.com/babakkamali/note-api/middleware"
 	"github.com/babakkamali/note-api/repository"
 	"github.com/babakkamali/note-api/services"
 	"github.com/gofiber/fiber/v2"
@@ -26,6 +27,7 @@ func SetupRoutes(app *fiber.App, dbConnection *gorm.DB) {
 
 	// Notes routes
 	notes := api.Group("/note")
+	notes.Use(middleware.Authentication)
 	notes.Post("/note", noteController.CreateNote)
 	notes.Get("/note/:id", noteController.GetNoteByID)
 	notes.Get("/notes", noteController.GetAllNotes)

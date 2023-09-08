@@ -6,7 +6,7 @@ import (
 )
 
 type UserRepository struct {
-    db *gorm.DB
+    Db *gorm.DB
 }
 
 func NewUserRepository(db *gorm.DB) *UserRepository {
@@ -15,7 +15,7 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 
 func (repo *UserRepository) GetUserByPhoneNumber(phone string) (*models.User, error) {
     var user models.User
-    err := repo.db.Where("phone_number = ?", phone).First(&user).Error
+    err := repo.Db.Where("phone_number = ?", phone).First(&user).Error
     if err != nil {
         return nil, err
     }
@@ -23,5 +23,5 @@ func (repo *UserRepository) GetUserByPhoneNumber(phone string) (*models.User, er
 }
 
 func (repo *UserRepository) CreateUser(user *models.User) error {
-    return repo.db.Create(user).Error
+    return repo.Db.Create(user).Error
 }

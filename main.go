@@ -1,21 +1,23 @@
 package main
 
 import (
-	"github.com/gofiber/fiber/v2"
+	"log"
+
 	db "github.com/babakkamali/note-api/config"
 	routes "github.com/babakkamali/note-api/routes"
+	"github.com/gofiber/fiber/v2"
 )
 
 
-func main()	{
+func main() {
+    dbConnection, err := db.Connect()
+    if err != nil {
+        log.Fatalf("Failed to connect to the database: %v", err)
+    }
 
-	db.Connect()
+    app := fiber.New()
 
+    routes.SetupRoutes(app, dbConnection)
 
-	app := fiber.New()
-
-	routes.SetupRoutes(app)
-
-	app.Listen(":8000")
-
+    app.Listen(":8000")
 }

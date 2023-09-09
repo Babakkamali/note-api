@@ -36,8 +36,7 @@ func (uc *UserController) AuthenticateOrRegister(c *fiber.Ctx) error {
         return utils.SendErrorResponse(c, fiber.StatusInternalServerError, err.Error())
     }
 
-    return c.JSON(fiber.Map{"status": "success", "message": "SMS token sent"})
-
+    return utils.SendResponse(c, fiber.StatusCreated, "SMS token sent", nil)
 }
 
 func (uc *UserController) ValidateSMSTokenAndLogin(c *fiber.Ctx) error {
@@ -55,5 +54,5 @@ func (uc *UserController) ValidateSMSTokenAndLogin(c *fiber.Ctx) error {
         return utils.SendErrorResponse(c, fiber.StatusInternalServerError, err.Error())
     }
 
-    return c.JSON(fiber.Map{"token": jwtToken})
+    return utils.SendResponse(c, fiber.StatusOK, "Logged in successfully", fiber.Map{"token": jwtToken})
 }

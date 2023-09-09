@@ -40,7 +40,7 @@ func (nc *NoteController) CreateNote(c *fiber.Ctx) error {
         return utils.SendErrorResponse(c, fiber.StatusInternalServerError, "Failed to create note")
     }
 
-    return c.JSON(fiber.Map{"status": "success", "message": "Note created", "data": newNote})
+    return utils.SendResponse(c, fiber.StatusCreated, "Note created", nil)
 }
 
 // GetNoteByID handles GET requests to retrieve a note by its ID.
@@ -65,7 +65,7 @@ func (nc *NoteController) GetNoteByID(c *fiber.Ctx) error {
         return utils.SendErrorResponse(c, fiber.StatusNotFound, "Note not found")
     }
 
-    return c.JSON(retrievedNote)
+    return utils.SendResponse(c, fiber.StatusOK, "Note fetched successfully", retrievedNote)
 }
 
 // GetAllNotes handles GET requests to retrieve all notes of a user.
@@ -80,7 +80,7 @@ func (nc *NoteController) GetAllNotes(c *fiber.Ctx) error {
         return utils.SendErrorResponse(c, fiber.StatusInternalServerError, "Failed to retrieve notes")
     }
 
-    return c.JSON(fiber.Map{"status": "success", "data": notes})
+    return utils.SendResponse(c, fiber.StatusOK, "Notes fetched successfully", notes)
 }
 
 // UpdateNote handles PUT requests to update a note by ID.
@@ -109,7 +109,7 @@ func (nc *NoteController) UpdateNote(c *fiber.Ctx) error {
         return utils.SendErrorResponse(c, fiber.StatusInternalServerError, "Failed to update note")
     }
 
-    return c.JSON(fiber.Map{"status": "success", "message": "Note updated successfully"})
+    return utils.SendResponse(c, fiber.StatusOK, "Note updated successfully", nil)
 }
 
 
@@ -135,5 +135,5 @@ func (nc *NoteController) DeleteNote(c *fiber.Ctx) error {
         return utils.SendErrorResponse(c, fiber.StatusInternalServerError, "Failed to delete note")
     }
 
-    return c.JSON(fiber.Map{"status": "success", "message": "Note deleted successfully"})
+    return utils.SendResponse(c, fiber.StatusOK, "Note deleted successfully", nil)
 }

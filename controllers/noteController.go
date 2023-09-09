@@ -40,7 +40,7 @@ func (nc *NoteController) CreateNote(c *fiber.Ctx) error {
         return utils.SendErrorResponse(c, fiber.StatusInternalServerError, "Failed to create note")
     }
 
-    return utils.SendResponse(c, fiber.StatusCreated, "Note created", nil)
+    return utils.SendResponse(c, fiber.StatusCreated, "Note created", newNote)
 }
 
 // GetNoteByID handles GET requests to retrieve a note by its ID.

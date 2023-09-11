@@ -5,6 +5,8 @@ import (
 
 	db "github.com/babakkamali/note-api/config"
 	routes "github.com/babakkamali/note-api/routes"
+	"github.com/babakkamali/note-api/utils"
+
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -16,8 +18,10 @@ func main() {
     }
 
     app := fiber.New()
+    utils.HealthCheck(app)
 
     routes.SetupRoutes(app, dbConnection)
 
-    app.Listen(":8000")
+    app.Listen(":80")
 }
+

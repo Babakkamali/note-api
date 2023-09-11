@@ -1,0 +1,33 @@
+version: '3.9'
+
+services:
+  app:
+    image: note-api:latest
+    ports:
+      - "8000:80"
+    depends_on:
+      - db
+    networks:
+      - note-app
+
+  db:
+    image: docker.arvancloud.ir/mysql:8.0
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DBNAME}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - note-app
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-p", "password"]
+      timeout: 20s
+      retries: 10
+
+volumes:
+  mysql_data:
+    external: true
+
+networks:
+  note-app:
+    external: true

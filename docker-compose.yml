@@ -16,7 +16,7 @@ services:
       MYSQL_DATABASE: ${MYSQL_DBNAME}
       MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
-      - mysql_data:/var/lib/mysql
+      - note_mysql_data:/var/lib/mysql
     networks:
       - note-app
     healthcheck:
@@ -25,7 +25,7 @@ services:
       retries: 10
 
 volumes:
-  mysql_data:
+  note_mysql_data:
     external: true
 
 networks:

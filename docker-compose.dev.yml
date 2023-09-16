@@ -9,17 +9,21 @@ services:
     ports:
       - "8000:80"
     depends_on:
-      - db
+      db:
+        condition: service_healthy # this service will wait till db container is healthy
+
 
   db:
     image: docker.arvancloud.ir/mysql:8.0
     environment:
       MYSQL_DATABASE: ${MYSQL_DBNAME}
       MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3307:3306" #to check data with phpmyadmin on another container
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-p", "password"]
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
       timeout: 20s
       retries: 10
 

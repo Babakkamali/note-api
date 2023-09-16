@@ -3,6 +3,9 @@ FROM docker.arvancloud.ir/golang:1.18 AS builder
 
 WORKDIR /app
 
+# Set the GOPROXY environment variable
+ENV GOPROXY=https://goproxy.io,direct
+
 # Copy go mod and sum files first, leverage Docker cache for dependencies
 COPY go.mod go.sum ./
 RUN go mod download

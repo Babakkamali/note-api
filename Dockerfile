@@ -3,6 +3,9 @@ FROM golang:1.18 AS builder
 
 WORKDIR /app
 
+# Set the GOPROXY environment variable
+ENV GOPROXY=https://proxy.golang.org,direct
+
 # Copy go mod and sum files first, leverage Docker cache for dependencies
 COPY go.mod go.sum ./
 RUN go mod download

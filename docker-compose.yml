@@ -6,7 +6,8 @@ services:
     ports:
       - "8000:80"
     depends_on:
-      - db
+      db:
+        condition: service_healthy # this service will wait till db container is healthy
     networks:
       - note-app
 
@@ -15,12 +16,14 @@ services:
     environment:
       MYSQL_DATABASE: ${MYSQL_DBNAME}
       MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3307:3306" #to check data with phpmyadmin on another container
     volumes:
       - note_mysql_data:/var/lib/mysql
     networks:
       - note-app
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-p", "password"]
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
       timeout: 20s
       retries: 10
 

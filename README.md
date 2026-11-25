@@ -78,15 +78,3 @@ The API listens on `http://localhost:8000`, and MySQL is exposed on port `3307` 
 The image is a multi-stage build. Go compiles a static binary in the `golang` image, and the binary ships in `alpine` with a container health check on `/health`.
 
 `docker-compose.yml` is the deployment variant. It uses a pre-built image and an external network and volume.
-
-## What I'd do differently today
-
-This is a student project from 2023. Looking at it now, these are the parts I'd change.
-
-- The Dockerfile copies `.env` into the image. Config should come from the environment or a secret store at runtime.
-- `/login` sends a paid SMS with no limit per phone number or IP, which is an abuse and cost risk in production.
-- One-time codes are stored in plain text. They should be hashed, usable once, and locked after a few failed attempts.
-- `dgrijalva/jwt-go` is unmaintained. I'd move to `golang-jwt/jwt` and add refresh tokens and revocation.
-- `/health` always returns OK. A readiness check should also ping the database.
-- `AutoMigrate` on startup is fine for a prototype, but versioned migrations are safer once the data matters.
-- There are no automated tests. I'd start with unit tests for the services and a CI pipeline to run them.
